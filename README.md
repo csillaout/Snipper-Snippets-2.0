@@ -4,7 +4,7 @@ Snipper Snippets new/simple version
 
 # FastAPI Blog and User Management
 
-This FastAPI application provides a simple way to manage users and blogs with basic authentication. Users can be created with their email and password, and blogs can be created with encrypted content. The application also provides endpoints to retrieve all users and blogs, with the content decrypted before returning it to the client.
+This FastAPI application provides a simple way to manage users and blogs with JWT authentication. Users can be created with their email and password, and blogs can be created with encrypted content. The application also provides endpoints to retrieve all users and blogs, with the content decrypted before returning it to the client.
 
 ## Features
 
@@ -12,6 +12,7 @@ This FastAPI application provides a simple way to manage users and blogs with ba
 - Create blogs with encrypted content
 - Retrieve all users (excluding passwords)
 - Retrieve all blogs with decrypted content
+- JWT authentication for creating and retrieving blogs
 - Interactive API documentation with Swagger UI
 
 ## Requirements
@@ -89,3 +90,25 @@ Once the server is running, you can access the application in your browser at `h
 ### Swagger UI
 
 FastAPI automatically generates interactive API documentation using Swagger UI. To access it, navigate to `http://127.0.0.1:8000/docs` in your browser. Here you can see all the available endpoints, their methods, and you can interact with them directly.
+
+### Example Workflow
+
+1. Create a User:
+
+Use the POST /user endpoint to create a new user with an email and password.
+
+2. Get JWT Token:
+
+Use the POST /token endpoint with the email and password to get a JWT token.
+
+3. Authorize with JWT Token:
+
+In Swagger UI, click on the Authorize button, enter the token in the format Bearer <your_jwt_token>, and click Authorize.
+
+4. Create a Blog:
+
+Use the POST /blog endpoint to create a new blog post. Ensure you are authorized with the JWT token.
+
+5. Get Blogs:
+
+Use the GET /blogs endpoint to retrieve the list of blogs. Ensure you are authorized with the JWT token.

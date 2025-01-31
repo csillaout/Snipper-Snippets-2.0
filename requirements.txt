@@ -2,3 +2,5 @@ fastapi[standard]
 passlib
 bcrypt
 cryptography
+jsonwebtoken
+python-jose

@@ -4,3 +4,4 @@ bcrypt
 cryptography
 jsonwebtoken
 python-jose
+requests

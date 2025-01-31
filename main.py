@@ -1,8 +1,10 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from pydantic import BaseModel, EmailStr
 from typing import List
 from passlib.context import CryptContext
 from cryptography.fernet import Fernet
+from hashlib import sha256
 
 app = FastAPI()
 
@@ -38,6 +40,21 @@ def encrypt_text(text: str) -> str:
 def decrypt_text(text: str) -> str:
     return fernet.decrypt(text.encode()).decode()
 
+# Basic Auth setup
+security = HTTPBasic()
+
+# Function to verify user credentials
+def verify_user(credentials: HTTPBasicCredentials = Depends(security)):
+    email_hash = sha256(credentials.username.encode()).hexdigest()
+    for user in users_db:
+        if email_hash == sha256(user["email"].encode()).hexdigest() and pwd_context.verify(credentials.password, user["password"]):
+            return True
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid authentication credentials",
+        headers={"WWW-Authenticate": "Basic"},
+    )
+
 # POST request to create a new user
 @app.post("/user")
 def create_user(user: User):
@@ -57,17 +74,17 @@ def get_users():
 def get_raw_users():
     return users_db
 
-# POST request to create a new blog
+# POST request to create a new blog, requires authentication
 @app.post("/blog")
-def create_blog(blog: Blog):
+def create_blog(blog: Blog, authenticated: bool = Depends(verify_user)):
     blog_dict = blog.dict()
     blog_dict["content"] = encrypt_text(blog.content)
     blogs_db.append(blog_dict)
     return {"msg": "Blog created successfully"}
 
-# GET request to retrieve all blogs
+# GET request to retrieve all blogs, requires authentication
 @app.get("/blogs", response_model=List[Blog])
-def get_blogs():
+def get_blogs(authenticated: bool = Depends(verify_user)):
     decrypted_blogs = [
         {**blog, "content": decrypt_text(blog["content"])} for blog in blogs_db
     ]
